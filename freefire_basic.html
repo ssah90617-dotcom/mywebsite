@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mini Free Fire</title>
+<style>
+body{
+  text-align:center;
+  background:#111;
+  color:white;
+  font-family:Arial;
+}
+canvas{
+  background:#222;
+  display:block;
+  margin:auto;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🔥 Mini Free Fire (Basic)</h2>
+<p id="score">Score: 0</p>
+
+<canvas id="game" width="300" height="400"></canvas>
+
+<div>
+  <button onclick="move('left')">⬅️</button>
+  <button onclick="move('right')">➡️</button>
+  <button onclick="shoot()">🔫 Shoot</button>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player = { x:140, y:350, w:20, h:20 };
+let bullets = [];
+let enemies = [];
+let score = 0;
+let gameOver = false;
+
+function move(dir){
+  if(gameOver) return;
+  if(dir=="left" && player.x>0) player.x -= 20;
+  if(dir=="right" && player.x<280) player.x += 20;
+}
+
+function shoot(){
+  if(gameOver) return;
+  bullets.push({x:player.x+8, y:player.y});
+}
+
+function spawnEnemy(){
+  if(gameOver) return;
+  enemies.push({x:Math.random()*280, y:0, r:10});
+}
+
+function update(){
+  if(gameOver) return;
+
+  ctx.clearRect(0,0,300,400);
+
+  // Player
+  ctx.fillStyle="cyan";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
+
+  // Bullets
+  ctx.fillStyle="yellow";
+  bullets.forEach(b=>{
+    b.y -= 5;
+    ctx.fillRect(b.x,b.y,4,8);
+  });
+
+  // Enemies
+  ctx.fillStyle="red";
+  enemies.forEach(e=>{
+    e.y += 2;
+    ctx.beginPath();
+    ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+    ctx.fill();
+
+    // Game over check
+    if(e.y > 340 &&
+       e.x > player.x &&
+       e.x < player.x+20){
+      gameOver = true;
+      alert("Game Over! Score: "+score);
+    }
+  });
+
+  // Collision
+  bullets.forEach((b,bi)=>{
+    enemies.forEach((e,ei)=>{
+      if(b.x>e.x-10 && b.x<e.x+10 && b.y>e.y-10){
+        bullets.splice(bi,1);
+        enemies.splice(ei,1);
+        score++;
+        document.getElementById("score").innerText="Score: "+score;
+      }
+    });
+  });
+}
+
+setInterval(update,20);
+setInterval(spawnEnemy,1000);
+</script>
+
+</body>
+</html>
