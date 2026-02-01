@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>InstaPro+</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#fafafa;
+  margin:0;
+}
+header{
+  background:#fff;
+  padding:15px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  border-bottom:1px solid #ddd;
+}
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:10px;
+}
+input,textarea{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+}
+button{
+  background:#0095f6;
+  color:white;
+  border:none;
+  padding:10px;
+  width:100%;
+  margin-top:5px;
+}
+.post{
+  background:#fff;
+  margin-top:15px;
+  border:1px solid #ddd;
+}
+.post img,video{
+  width:100%;
+}
+.actions{
+  padding:10px;
+}
+.actions button{
+  width:auto;
+  margin-right:5px;
+}
+.comment{
+  font-size:14px;
+  padding:5px 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>📸 InstaPro+</header>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <h3>Login / Signup</h3>
+  <input id="username" placeholder="Username">
+  <button onclick="login()">Enter</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+<h3 id="userShow"></h3>
+
+<textarea id="caption" placeholder="Write caption..."></textarea>
+<input type="file" id="file">
+<button onclick="upload()">Upload Post</button>
+
+<div id="feed"></div>
+
+</div>
+</div>
+
+<script>
+let currentUser="";
+let posts=[];
+
+function login(){
+  let u=document.getElementById("username").value;
+  if(u==""){alert("Username likho");return;}
+  currentUser=u;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("userShow").innerText="Welcome "+u;
+}
+
+function upload(){
+  let cap=document.getElementById("caption").value;
+  let file=document.getElementById("file").files[0];
+  if(!file){alert("File select karo");return;}
+
+  let url=URL.createObjectURL(file);
+
+  posts.unshift({
+    user:currentUser,
+    caption:cap,
+    file:url,
+    likes:0,
+    comments:[]
+  });
+
+  showFeed();
+}
+
+function showFeed(){
+  let f=document.getElementById("feed");
+  f.innerHTML="";
+
+  posts.forEach((p,i)=>{
+    let post=document.createElement("div");
+    post.className="post";
+
+    if(p.file.includes("video")){
+      post.innerHTML=`<video controls src="${p.file}"></video>`;
+    }else{
+      post.innerHTML=`<img src="${p.file}">`;
+    }
+
+    post.innerHTML+=`
+    <div class="actions">
+      <b>${p.user}</b><br>
+      ${p.caption}<br><br>
+      ❤️ ${p.likes}
+      <button onclick="like(${i})">Like</button>
+      <input id="c${i}" placeholder="Comment">
+      <button onclick="comment(${i})">Send</button>
+    </div>
+    `;
+
+    p.comments.forEach(c=>{
+      post.innerHTML+=`<div class="comment">💬 ${c}</div>`;
+    });
+
+    f.appendChild(post);
+  });
+}
+
+function like(i){
+  posts[i].likes++;
+  showFeed();
+}
+
+function comment(i){
+  let c=document.getElementById("c"+i).value;
+  if(c=="")return;
+  posts[i].comments.push(currentUser+": "+c);
+  showFeed();
+}
+</script>
+
+</body>
+</html>
